@@ -47,7 +47,21 @@ while (mainLoop)
             // Open the file and do the thing
             if (File.Exists(input))
             {
-                ProcessXmlFile(input);
+                UI.Header("File Found");
+                Console.WriteLine($"Current file: \"{input}\"");
+                Console.WriteLine();
+                Console.WriteLine("Remove elements from this file?");
+                UI.Option("[Y]", "Yes");
+                UI.Option("[N]", "N-no... Nevermind.");
+                
+                switch(Input.GetString("Y").ToUpper())
+                {
+                    case "Y":
+                        ProcessXmlFile(input);
+                        break;
+                    default:
+                        break;
+                }
             }
             else
             {
@@ -64,15 +78,87 @@ UI.Header("Goodbye");
 void Settings()
 {
     UI.Header("Settings");
-    Console.WriteLine("Elements to Remove:");
+    UI.Option("[E]LEMENTS", "Modify elements list.");
 
-    foreach (string element in elementList)
+    switch (Input.GetString().ToUpper())
     {
-        Console.WriteLine($"\t{element}");
+        case "E":
+        case "ELEMENTS":
+            SettingsChangeElements();
+            break;
     }
 
-    UI.Pause();
 }
+
+
+void SettingsChangeElements()
+{
+    bool menuModifyElements = true;
+
+    while (menuModifyElements)
+    {
+        UI.Header("Modify Elements");
+        UI.Write("Add or remove elements from the list.");
+        UI.Write("The list defines elements that will be removed from XML files.");
+        UI.Write();
+        UI.Option("[ADD]", "Add elements to list");
+        UI.Option("[DEL]", "Remove elements from list");
+
+        string input = Input.GetString();
+
+        switch (input.ToUpper())
+        {
+            case "ADD":
+                bool menuadd = true;
+                while (menuadd)
+                {
+                    UI.Header("Add Elements");
+                    UI.Write("Current elements list:");
+                    UI.Write();
+                    foreach (string element in elementList) UI.Write($"\t{element}");
+                    UI.Write();
+                    UI.Write("Type element names and press ENTER to add them to the list.");
+                    UI.Write("Press ENTER with a blank line to finish.");
+                    string newElement = Input.GetString();
+                    if (newElement != "")
+                    {
+                        elementList.Add(newElement);
+                    }
+                    else
+                    {
+                        menuadd = false;
+                    }
+                }
+                break;
+            case "DEL":
+                bool menudel = true;
+                while (menudel)
+                {
+                    UI.Header("Delete Elements");
+                    UI.Write("Current elements list:");
+                    UI.Write();
+                    foreach (string element in elementList) UI.Write($"\t{element}");
+                    UI.Write();
+                    UI.Write("Type element names and press ENTER to remove them from the list.");
+                    UI.Write("Press ENTER with a blank line to finish.");
+                    string removeElement = Input.GetString();
+                    if (removeElement != "")
+                    {
+                        elementList.Remove(removeElement);
+                    }
+                    else
+                    {
+                        menudel = false;
+                    }
+                }
+                break;
+            default:
+                menuModifyElements = false;
+                break;
+        }
+    }
+}
+
 
 void ProcessXmlFile(string fname)
 {
@@ -81,44 +167,58 @@ void ProcessXmlFile(string fname)
     XmlDocument xmlDoc = new XmlDocument();
     xmlDoc.Load(fname);
 
-    for (int i = 0; i < elementList.Count; i++)
+    if (elementList.Count > 0)
     {
-        Console.WriteLine($"\tRemoving \"{elementList[i]}\"... ");
-
-        XmlNodeList elementsToRemove = xmlDoc.GetElementsByTagName(elementList[i]);
-
-        if (elementsToRemove.Count > 0)
+        for (int i = 0; i < elementList.Count; i++)
         {
-            for (int j = elementsToRemove.Count - 1; j >= 0; j--)
-            {
-                XmlNode element = elementsToRemove[j];
+            Console.WriteLine($"\tRemoving \"{elementList[i]}\"... ");
 
-                if (element != null)
+            XmlNodeList elementsToRemove = xmlDoc.GetElementsByTagName(elementList[i]);
+
+            if (elementsToRemove.Count > 0)
+            {
+                for (int j = elementsToRemove.Count - 1; j >= 0; j--)
                 {
-                    if (element.ParentNode != null)
+                    XmlNode element = elementsToRemove[j];
+
+                    if (element != null)
                     {
-                        element.ParentNode.RemoveChild(element);
+                        if (element.ParentNode != null)
+                        {
+                            element.ParentNode.RemoveChild(element);
+                        }
+                        else
+                        {
+                            UI.Error("ParentNode returned null.");
+                        }
                     }
                     else
                     {
-                        UI.Error("ParentNode returned null.");
+                        UI.Error($"element returned null.");
                     }
                 }
-                else
-                {
-                    UI.Error($"element returned null.");
-                }
             }
+            else
+            {
+                UI.Error($"No matching element \"{elementList[i]}\" found in the XML file.");
+            }
+        }
 
-            xmlDoc.Save(fname);
-        }
-        else
-        {
-            UI.Error($"No matching element \"{elementList[i]}\" found in the XML file.");
-        }
+        Console.WriteLine("Done");
+        Console.WriteLine("Press enter to save, or define a new filename.");
+
+        string fnameNew = Input.GetString(fname);
+
+        xmlDoc.Save(fnameNew);
+
+        Console.WriteLine("Saved!");
+
+        UI.Pause();
     }
-
-    Console.WriteLine("Done!");
-
-    UI.Pause();
+    else
+    {
+        UI.Error("No defined elements in list!");
+        UI.Write("The alements list defines the XML elements that are to be removed by the program.");
+        UI.Write("Go to Settings > Elements > Add to add elements to the list.");
+    }
 }

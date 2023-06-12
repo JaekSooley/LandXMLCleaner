@@ -141,7 +141,8 @@
 
         static void InputInvalid(string type, string input, string valueSetTo)
         {
-            UI.Warning($"\"{input}\" was not of type \"{type}\". Default value \"{valueSetTo}\" was used.");
+            if (input == "") Console.WriteLine($"Default value \"{valueSetTo}\" used.");
+            else Console.WriteLine($"Invalid input! Default value \"{valueSetTo}\" used.");
         }
     }
 }

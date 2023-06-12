@@ -22,7 +22,6 @@ while (mainLoop)
     UI.Option("E[X]IT");
 
     string input = Input.GetString();
-
     input = input.Replace("\"", "");
 
     switch (input.ToUpper())
@@ -31,7 +30,6 @@ while (mainLoop)
         // More options here.
         case "S":
         case "SETTINGS":
-            UI.Header("Settings");
             Settings();
             break;
 
@@ -47,33 +45,44 @@ while (mainLoop)
             // Open the file and do the thing
             if (File.Exists(input))
             {
-                UI.Header("File Found");
-                Console.WriteLine($"Current file: \"{input}\"");
-                Console.WriteLine();
-                Console.WriteLine("Remove elements from this file?");
-                UI.Option("[Y]", "Yes");
-                UI.Option("[N]", "N-no... Nevermind.");
-                
-                switch(Input.GetString("Y").ToUpper())
+                bool menuProcess = true;
+                while (menuProcess)
                 {
-                    case "Y":
-                        ProcessXmlFile(input);
-                        break;
-                    default:
-                        break;
+                    UI.Header("File Found");
+                    Console.WriteLine($"Current file: \"{input}\"");
+                    Console.WriteLine();
+                    Console.WriteLine("Remove elements from this file?");
+                    UI.Option("[Y]", "Yes");
+                    UI.Option("[N]", "N-no... Nevermind.");
+                    UI.Write();
+                    UI.Option("[S]ETTINGS");
+
+                    switch (Input.GetString("Y").ToUpper())
+                    {
+                        case "Y":
+                            ProcessXmlFile(input);
+                            menuProcess = false;
+                            break;
+                        case "S":
+                        case "SETTINGS":
+                            Settings();
+                            break;
+                        default:
+                            menuProcess = false;
+                            break;
+                    }
                 }
             }
             else
             {
-                UI.Header("Error");
-                Console.WriteLine("Unrecognised command!");
-                UI.Pause();
+                UI.Error("Unrecognised command!");
             }
             break;
     }
 }
 
 UI.Header("Goodbye");
+
 
 void Settings()
 {
@@ -171,7 +180,7 @@ void ProcessXmlFile(string fname)
     {
         for (int i = 0; i < elementList.Count; i++)
         {
-            Console.WriteLine($"\tRemoving \"{elementList[i]}\"... ");
+            UI.Write($"\tRemoving \"{elementList[i]}\"... ");
 
             XmlNodeList elementsToRemove = xmlDoc.GetElementsByTagName(elementList[i]);
 
@@ -200,7 +209,8 @@ void ProcessXmlFile(string fname)
             }
             else
             {
-                UI.Error($"No matching element \"{elementList[i]}\" found in the XML file.");
+                UI.Write($"\t\"{elementList[i]}\" not found.");
+                UI.Write();
             }
         }
 

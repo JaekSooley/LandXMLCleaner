@@ -40,8 +40,8 @@
             Console.WriteLine(description);
         }
 
-        // Yes this is just because I can't be bothered typing Console.WriteLine() all the time.
-        // No I will not be taking questions.
+        // Yes, this is just because I can't be bothered typing Console.WriteLine() all the time.
+        // No, I will not be taking questions.
         public static void Write(string text = "")
         {
             Console.WriteLine(text);

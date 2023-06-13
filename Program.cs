@@ -14,9 +14,9 @@ elementList.Add("SourceData");
 while (mainLoop)
 {
     UI.Header("Home");
-    Console.WriteLine("This program removes unwanted elements from LandXML files to reduce size and remove breaklines when importing into drawings.");
+    Console.WriteLine("This program removes unwanted elements from LandXML files to reduce bloat.");
     Console.WriteLine("");
-    Console.WriteLine("Drag and drop xml file and press ENTER to begin.");
+    Console.WriteLine("Drag and drop an XML file and press ENTER to begin.");
     Console.WriteLine("");
     UI.Option("[S]ETTINGS");
     UI.Option("E[X]IT");
@@ -107,6 +107,10 @@ void SettingsChangeElements()
     while (menuModifyElements)
     {
         UI.Header("Modify Elements");
+        UI.Write("Current elements:");
+        UI.Write();
+        foreach (string element in elementList) UI.Write($"\t{element}");
+        UI.Write();
         UI.Write("Add or remove elements from the list.");
         UI.Write("The list defines elements that will be removed from XML files.");
         UI.Write();
@@ -122,11 +126,11 @@ void SettingsChangeElements()
                 while (menuadd)
                 {
                     UI.Header("Add Elements");
-                    UI.Write("Current elements list:");
+                    UI.Write("Current elements:");
                     UI.Write();
                     foreach (string element in elementList) UI.Write($"\t{element}");
                     UI.Write();
-                    UI.Write("Type element names and press ENTER to add them to the list.");
+                    UI.Write("Type an element name and press ENTER to add them to the list.");
                     UI.Write("Press ENTER with a blank line to finish.");
                     string newElement = Input.GetString();
                     if (newElement != "")
@@ -144,11 +148,11 @@ void SettingsChangeElements()
                 while (menudel)
                 {
                     UI.Header("Delete Elements");
-                    UI.Write("Current elements list:");
+                    UI.Write("Current elements:");
                     UI.Write();
                     foreach (string element in elementList) UI.Write($"\t{element}");
                     UI.Write();
-                    UI.Write("Type element names and press ENTER to remove them from the list.");
+                    UI.Write("Type an element's name and press ENTER to remove them from the list.");
                     UI.Write("Press ENTER with a blank line to finish.");
                     string removeElement = Input.GetString();
                     if (removeElement != "")

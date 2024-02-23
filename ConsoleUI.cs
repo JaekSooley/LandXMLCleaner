@@ -62,7 +62,7 @@
         public static bool GetBoolean(bool defaultValue = false)
         {
             string type = "bool";
-            UI.Input("bool", defaultValue.ToString());
+            UI.Input(type, defaultValue.ToString());
             string input = ReadLine();
             bool output = defaultValue;
             if (bool.TryParse(input, out bool val)) output = val;
@@ -73,7 +73,7 @@
         public static int GetInteger(int defaultValue = 0)
         {
             string type = "int";
-            UI.Input("int", defaultValue.ToString());
+            UI.Input(type, defaultValue.ToString());
             string input = ReadLine();
             int output = defaultValue;
             if (int.TryParse(input, out int val)) output = val;

@@ -2,23 +2,30 @@
 using ConsoleUI;
 using System;
 using System.Xml;
+using System.IO;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 
-List<string> elementList = new List<string>(); // List of elements to remove
+List<string> elementList = new List<string> // List of elements to remove
+{
+    "PlanFeatures",
+    "SourceData",
+    "Alignment",
+    "Alignments"
+};
+
 
 bool mainLoop = true;
-
-elementList.Add("PlanFeatures");
-elementList.Add("SourceData");
 
 while (mainLoop)
 {
     UI.Header("Home");
-    Console.WriteLine("This program removes unwanted elements from LandXML files to reduce bloat.");
-    Console.WriteLine("");
-    Console.WriteLine("Drag and drop an XML file and press ENTER to begin.");
-    Console.WriteLine("");
-    UI.Option("[S]ETTINGS");
+    UI.Write("This program removes unwanted elements from LandXML files to reduce bloat.");
+    UI.Write("");
+    UI.Write("Drag and drop an XML file and press ENTER to begin.");
+    UI.Write("");
+    UI.Option("[S]ETTINGS", "Add or remove elements");
     UI.Option("E[X]IT");
 
     string input = Input.GetString();
@@ -45,31 +52,51 @@ while (mainLoop)
             // Open the file and do the thing
             if (File.Exists(input))
             {
-                bool menuProcess = true;
-                while (menuProcess)
+                string ext = Path.GetExtension(input);
+                if (ext == ".json")
                 {
-                    UI.Header("File Found");
-                    Console.WriteLine($"Current file: \"{input}\"");
-                    Console.WriteLine();
-                    Console.WriteLine("Remove elements from this file?");
+                    UI.Header("JSON File Found");
+                    UI.Write("Load elements from JSON file?");
                     UI.Option("[Y]", "Yes");
-                    UI.Option("[N]", "N-no... Nevermind.");
-                    UI.Write();
-                    UI.Option("[S]ETTINGS");
+                    UI.Option("[N]", "No");
 
-                    switch (Input.GetString("Y").ToUpper())
+                    switch(Input.GetString("Y").ToUpper())
                     {
                         case "Y":
-                            ProcessXmlFile(input);
-                            menuProcess = false;
-                            break;
-                        case "S":
-                        case "SETTINGS":
-                            Settings();
+                            ProcessJsonFile(input);
                             break;
                         default:
-                            menuProcess = false;
                             break;
+                    }
+                }
+                else
+                {
+                    bool menuProcess = true;
+                    while (menuProcess)
+                    {
+                        UI.Header("File Found");
+                        UI.Write($"Current file: \"{input}\"");
+                        UI.Write();
+                        UI.Write("Remove elements from this file?");
+                        UI.Option("[Y]", "Yes");
+                        UI.Option("[N]", "N-no... Nevermind.");
+                        UI.Write();
+                        UI.Option("[S]ETTINGS");
+
+                        switch (Input.GetString("Y").ToUpper())
+                        {
+                            case "Y":
+                                ProcessXmlFile(input);
+                                menuProcess = false;
+                                break;
+                            case "S":
+                            case "SETTINGS":
+                                Settings();
+                                break;
+                            default:
+                                menuProcess = false;
+                                break;
+                        }
                     }
                 }
             }
@@ -116,11 +143,13 @@ void SettingsChangeElements()
         UI.Write();
         UI.Option("[ADD]", "Add elements to list");
         UI.Option("[DEL]", "Remove elements from list");
+        UI.Option("[E]xport", "Export elements list to JSON file");
 
         string input = Input.GetString();
 
         switch (input.ToUpper())
         {
+            case "A":
             case "ADD":
                 bool menuadd = true;
                 while (menuadd)
@@ -143,6 +172,7 @@ void SettingsChangeElements()
                     }
                 }
                 break;
+            case "D":
             case "DEL":
                 bool menudel = true;
                 while (menudel)
@@ -164,6 +194,13 @@ void SettingsChangeElements()
                         menudel = false;
                     }
                 }
+                break;
+            case "E":
+            case "EXPORT":
+                UI.Header("Export Elements");
+                UI.Write("Enter path to save file to");
+                UI.Write("This doesn't actually work yet, but it'd be cool if it did.");
+                UI.Pause();
                 break;
             default:
                 menuModifyElements = false;
@@ -218,14 +255,14 @@ void ProcessXmlFile(string fname)
             }
         }
 
-        Console.WriteLine("Done");
-        Console.WriteLine("Press enter to save, or define a new filename.");
+        UI.Write("Done");
+        UI.Write("Press enter to save, or define a new filename.");
 
         string fnameNew = Input.GetString(fname);
 
         xmlDoc.Save(fnameNew);
 
-        Console.WriteLine("Saved!");
+        UI.Write("Saved!");
 
         UI.Pause();
     }
@@ -235,4 +272,21 @@ void ProcessXmlFile(string fname)
         UI.Write("The alements list defines the XML elements that are to be removed by the program.");
         UI.Write("Go to Settings > Elements > Add to add elements to the list.");
     }
+}
+
+void ProcessJsonFile(string fname)
+{
+    UI.Header("Import Elements");
+    string jsonText = File.ReadAllText(fname);
+
+    elementList.Clear();
+
+    var jsonList = JsonSerializer.Deserialize<List<String>>(jsonText);
+    if (jsonList != null)
+    {
+        elementList = jsonList.ToList();
+    }
+
+    UI.Write($"Imported {elementList.Count} elements");
+    UI.Pause();
 }

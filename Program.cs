@@ -11,7 +11,6 @@ List<string> elementList = new List<string> // List of elements to remove
 {
     "PlanFeatures",
     "SourceData",
-    "Alignment",
     "Alignments"
 };
 

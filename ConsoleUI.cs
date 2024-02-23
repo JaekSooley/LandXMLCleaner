@@ -14,9 +14,21 @@
 
         public static void Option(string option, string description = "", string current = "")
         {
+            int descriptionOffset = 24;
+
             string text = $"\t{option}";
+            string whitespace = "";
+
+            if (text.Length <= descriptionOffset)
+            {
+                for (int i = 0; i <= descriptionOffset - text.Length; i++)
+                {
+                    whitespace += " ";
+                }
+            }
+
             if (current != "") text += $" ({current})";
-            if (description != "") text += $"\t\t- {description}";
+            if (description != "") text += $"{whitespace} - {description}";
             Console.WriteLine(text);
         }
 

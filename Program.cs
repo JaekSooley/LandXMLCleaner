@@ -7,15 +7,19 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 
 
-List<string> elementList = new List<string> // List of elements to remove
+List<string> elementList = new() // List of elements to remove
 {
     "PlanFeatures",
     "SourceData",
     "Alignments"
 };
+List<string> fileList = new();
 
+string fnameAppend = "-smol";
+string xmlExt = ".xml";
 
 bool mainLoop = true;
+
 
 while (mainLoop)
 {
@@ -48,10 +52,72 @@ while (mainLoop)
             break;
 
         default:
-            // Open the file and do the thing
-            if (File.Exists(input))
+            // Load/process all files in directory
+            if (Directory.Exists(input))
             {
-                string ext = Path.GetExtension(input);
+                fileList.Clear();
+
+                string[] files = Directory.GetFiles(input);
+                foreach(string file in files)
+                {
+                    if (Path.GetExtension(file).ToLower() == xmlExt)
+                    {
+                        fileList.Add(file);
+                    }
+                }
+
+                if (fileList.Count > 0)
+                {
+
+                    bool menuProcess = true;
+                    while (menuProcess)
+                    {
+                        UI.Header("Folder Found");
+                        UI.Write($"Current files:");
+                        foreach (string file in fileList)
+                        {
+                            UI.Write($"\t{file}");
+                        }
+                        UI.Write();
+                        UI.Write("Remove elements from files?");
+                        UI.Option("[Y]", "Yes");
+                        UI.Option("[N]", "No");
+                        UI.Write();
+                        UI.Write("Note: Files will be automatically renamed.");
+                        UI.Write();
+                        UI.Option("[S]ETTINGS");
+
+                        switch (Input.GetString("Y").ToUpper())
+                        {
+                            case "Y":
+                                UI.Header("Cleaning LandXML files...");
+                                foreach (string file in fileList)
+                                {
+                                    ProcessXmlFile(file, true);
+                                }
+                                UI.Pause();
+                                menuProcess = false;
+                                break;
+                            case "S":
+                            case "SETTINGS":
+                                Settings();
+                                break;
+                            default:
+                                menuProcess = false;
+                                break;
+                        }
+                    }
+                }
+                else
+                {
+                    UI.Error("No .xml files found!");
+                }
+            }
+
+            // Process single file
+            else if (File.Exists(input))
+            {
+                string ext = Path.GetExtension(input).ToLower();
                 if (ext == ".json")
                 {
                     UI.Header("JSON File Found");
@@ -68,15 +134,22 @@ while (mainLoop)
                             break;
                     }
                 }
-                else
+                else if (ext == xmlExt)
                 {
+                    fileList.Clear();
+                    fileList.Add(input);
+
                     bool menuProcess = true;
                     while (menuProcess)
                     {
                         UI.Header("File Found");
-                        UI.Write($"Current file: \"{input}\"");
+                        UI.Write($"Current file(s):");
+                        foreach (string file in fileList)
+                        {
+                            UI.Write($"\t{file}");
+                        }
                         UI.Write();
-                        UI.Write("Remove elements from this file?");
+                        UI.Write("Remove elements from file?");
                         UI.Option("[Y]", "Yes");
                         UI.Option("[N]", "N-no... Nevermind.");
                         UI.Write();
@@ -98,6 +171,11 @@ while (mainLoop)
                         }
                     }
                 }
+                else
+                {
+                    UI.Error("Unsupported file extension.");
+
+                }
             }
             else
             {
@@ -112,17 +190,37 @@ UI.Header("Goodbye");
 
 void Settings()
 {
-    UI.Header("Settings");
-    UI.Option("[E]LEMENTS", "Modify elements list.");
-
-    switch (Input.GetString().ToUpper())
+    bool active = true;
+    while (active)
     {
-        case "E":
-        case "ELEMENTS":
-            SettingsChangeElements();
-            break;
-    }
+        UI.Header("Settings");
+        UI.Option("[A]PPEND", "Change text added to new files.");
+        UI.Option("[E]LEMENTS", "Modify elements list.");
 
+        switch (Input.GetString().ToUpper())
+        {
+            case "A":
+            case "APPEND":
+                SettingsChangeAppend();
+                break;
+            case "E":
+            case "ELEMENTS":
+                SettingsChangeElements();
+                break;
+            default:
+                active = false;
+                break;
+        }
+    }
+}
+
+void SettingsChangeAppend()
+{
+    UI.Header("Change Append Text");
+    UI.Write("Change string automatically appended to new files");
+
+    string newAppend = Input.GetString(fnameAppend);
+    fnameAppend = newAppend;
 }
 
 
@@ -209,10 +307,9 @@ void SettingsChangeElements()
 }
 
 
-void ProcessXmlFile(string fname)
+void ProcessXmlFile(string fname, bool autosave = false)
 {
-    UI.Header("Cleaning LandXML file...");
-
+    UI.Write($"Cleaning {Path.GetFileName(fname)}...");
     XmlDocument xmlDoc = new XmlDocument();
     xmlDoc.Load(fname);
 
@@ -220,7 +317,7 @@ void ProcessXmlFile(string fname)
     {
         for (int i = 0; i < elementList.Count; i++)
         {
-            UI.Write($"\tRemoving \"{elementList[i]}\"... ");
+            Console.Write($"\tRemoving \"{elementList[i]}\"");
 
             XmlNodeList elementsToRemove = xmlDoc.GetElementsByTagName(elementList[i]);
 
@@ -243,33 +340,46 @@ void ProcessXmlFile(string fname)
                     }
                     else
                     {
-                        UI.Error($"element returned null.");
+                        UI.Error($"Element returned null.");
                     }
                 }
+                UI.Write();
             }
             else
             {
-                UI.Write($"\t\"{elementList[i]}\" not found.");
-                UI.Write();
+                // Couldn't find element in file
+                UI.Write("... Not found.");
             }
         }
 
-        UI.Write("Done");
-        UI.Write("Press enter to save, or define a new filename.");
+        string fnameNew;
 
-        string fnameNew = Input.GetString(fname);
+        string dir = Path.GetDirectoryName(fname);
+        string fnameNoExt = Path.GetFileNameWithoutExtension(fname);
 
-        xmlDoc.Save(fnameNew);
+        if (!autosave)
+        {
 
-        UI.Write("Saved!");
+            UI.Write("Done");
+            UI.Write("Press enter to save, or define a new filename.");
 
-        UI.Pause();
+            fnameNew = Input.GetString(fnameNoExt + fnameAppend);
+        }
+        else
+        {
+            fnameNew = fnameNoExt + fnameAppend;
+        }
+
+        xmlDoc.Save(dir + "\\" + fnameNew + xmlExt);
+
+        UI.Write($"\tSaved {fnameNew + xmlExt}");
+        UI.Write();
     }
     else
     {
         UI.Error("No defined elements in list!");
         UI.Write("The alements list defines the XML elements that are to be removed by the program.");
-        UI.Write("Go to Settings > Elements > Add to add elements to the list.");
+        UI.Write("Go to Settings > Elements > Add to add elements to the list, or input a .json file into the main menu.");
     }
 }
 
@@ -286,6 +396,13 @@ void ProcessJsonFile(string fname)
         elementList = jsonList.ToList();
     }
 
-    UI.Write($"Imported {elementList.Count} elements");
+    UI.Write($"Imported {elementList.Count} elements:");
+
+    foreach(string element in elementList)
+    {
+        UI.Write();
+        UI.Write("\t" + element);
+    }
+
     UI.Pause();
 }

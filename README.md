@@ -5,6 +5,8 @@ While this is set up for use with Civil 3D LandXML files, any .XML file should w
 
 Drag and drop a JSON file into the command line to automatically load a list of pre-defined elements to remove. This overwrites any existing elements.
 
+Directories containing multiple .xml files can be entered into the console for batch processing.
+
 **Expected JSON format**:
 
 ```

@@ -15,7 +15,7 @@ List<string> elementList = new() // List of elements to remove
 };
 List<string> fileList = new();
 
-string fnameAppend = "-smol";
+string fnameAppend = "-clean";
 string xmlExt = ".xml";
 
 bool mainLoop = true;
@@ -311,6 +311,7 @@ void ProcessXmlFile(string fname, bool autosave = false)
 {
     UI.Write($"Cleaning {Path.GetFileName(fname)}...");
     XmlDocument xmlDoc = new XmlDocument();
+    xmlDoc.PreserveWhitespace = true;
     xmlDoc.Load(fname);
 
     if (elementList.Count > 0)

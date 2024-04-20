@@ -1,9 +1,15 @@
-# LandXMLCleaner
+# Description
 
-A simple console application to remove elements from .XML files.
+Once a surface has been edited in Civil 3D and exported to a LandXML file, elements are added which define drawing objects (breaklines, alignments, etc.) used by the surface. This can cause signficant bloat for large enough surfaces.
+
+The LandXML surfaces only really need points and faces, and seem to be just fine after removing PlanFeatures/SourceData/Alignments.
+
+_LandXMLCleaner_ is simple console application to remove elements from .XML files.
 While this is set up for use with Civil 3D LandXML files, any .XML file should work.
 
-Drag and drop a JSON file into the command line to automatically load a list of pre-defined elements to remove. This overwrites any existing elements.
+Drag and drop an XML file or directory containing XML files into this handy-dandy console application and press ENTER to start. The application should create a copy of each file in the original file's directory, sans specified elements.
+
+Drag and drop a JSON file into the command line to quickly load a pre-defined list of elements to remove. This overwrites any existing elements.
 
 Directories containing multiple .xml files can be entered into the console for batch processing.
 
@@ -15,15 +21,3 @@ Directories containing multiple .xml files can be entered into the console for b
     "element2"
 ]
 ```
-
-## The Problem
-
-Once a surface has been edited in Civil 3D and exported to a LandXML file, elements for every line edit and breakline added to the surface. This can cause signficant bloat for large enough surfaces.
-
-The LandXML surfaces seem to be just fine after removing these PlanFeatures and SourceData elements, as they're only used to reconstruct surfaces in the case of missing 3D faces.
-
-## The Solution
-
-Drag and drop an XML file into this handy dandy console application and press ENTER to start. The application goes through the file and removes elements matching those specified in the Elements List.
-
-Comes set up for removing \<PlanFeatures\> and \<SourceData\> elements from files exported from AutoCAD Civil 3D.

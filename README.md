@@ -7,6 +7,8 @@ The LandXML surfaces only really need points and faces, and seem to be just fine
 _LandXMLCleaner_ is simple console application to remove elements from .XML files.
 While this is set up for use with Civil 3D LandXML files, any .XML file should work.
 
+# Usage
+
 Drag and drop an XML file or directory containing XML files into this handy-dandy console application and press ENTER to start. The application should create a copy of each file in the original file's directory, sans specified elements.
 
 Drag and drop a JSON file into the command line to quickly load a pre-defined list of elements to remove. This overwrites any existing elements.
